@@ -1,103 +1,223 @@
+# Customer Churn Prediction
 
+A machine learning project that predicts customer churn using tuned **Random Forest** and **XGBoost** models. The project includes a training/inference pipeline, a FastAPI backend (`main.py`), a Streamlit UI (`app_ui.py`), and Docker support for easy deployment.
 
-Markdown
-# Customer Churn Prediction API & Dashboard
-
-An end-to-end Machine Learning solution designed to predict customer churn. This repository provides a robust backend API built with **FastAPI**, an interactive frontend dashboard powered by **Streamlit** (or your UI framework of choice via `app_ui.py`), and full **Docker** containerization for seamless deployment.
+> ⚠️ Some details below (framework choices, endpoint names, env vars) are inferred from the project structure. Please update any section marked **TODO** to match your actual implementation.
 
 ---
 
-## 📂 Project Structure
+## Table of Contents
 
-```text
-├── DockerFile                  # Docker configuration for containerization
-├── Models/                     # Serialized ML models and preprocessing pipelines
-│   ├── RandomForestTuned.pkl   # Tuned Random Forest Classifier
-│   ├── xgb_tuned.pkl           # Tuned XGBoost Classifier
-│   └── processor.pkl           # Data preprocessing/scaling pipeline
-├── datasets/                   # Raw or sample datasets
-│   └── churn-data.csv          # Customer churn dataset
-├── main.py                     # FastAPI backend application entry point
-├── app_ui.py                   # Frontend UI interface (Streamlit / UI layer)
-├── utils/                      # Helper modules and core logic
-│   ├── CustomerData.py         # Pydantic models for data validation
-│   ├── inference.py            # Prediction pipeline logic
-│   └── config.py               # Application configuration and environment variables
-├── notebooks/                  # Jupyter notebooks for EDA and experimentation
-│   ├── notebook.ipynb          # Model training and evaluation notebook
-│   └── passGenerator.ipynb     # Utility notebook (e.g., password/token generation)
-└── requirements.txt            # Python dependencies
-🚀 Features
-Dual-Model Inference: Supports predicting churn using tuned versions of Random Forest and XGBoost.
+- [Overview](#overview)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+  - [Running the API](#running-the-api)
+  - [Running the UI](#running-the-ui)
+  - [Running with Docker](#running-with-docker)
+- [Models](#models)
+- [Dataset](#dataset)
+- [Notebooks](#notebooks)
+- [Configuration](#configuration)
+- [Development](#development)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
 
-Strict Data Validation: Utilizes Pydantic via CustomerData.py to ensure incoming API payloads strictly match expected data types.
+---
 
-Interactive UI: A dedicated dashboard (app_ui.py) to easily input customer attributes and visualize churn probability instantly.
+## Overview
 
-Production Ready: Fully containerized using Docker, allowing rapid deployment to cloud environments.
+This project predicts whether a customer is likely to churn based on historical customer data. It covers the full ML lifecycle:
 
-🛠️ Installation & Setup
-Prerequisites
-Python 3.11+
+1. **Data preparation & EDA** — `notebooks/notebook.ipynb`
+2. **Model training & tuning** — Random Forest and XGBoost, with a saved preprocessing pipeline
+3. **Inference** — `utils/inference.py` loads the trained models and processor to score new customer data
+4. **Serving** — a FastAPI app (`main.py`) exposes predictions as an API, and a Streamlit app (`app_ui.py`) provides an interactive UI
+5. **Deployment** — containerized via `DockerFile`
 
-Anaconda or venv virtual environment manager
+---
 
-1. Local Environment Setup
-Clone this repository to your local machine and navigate into the project directory:
+## Project Structure
 
-Bash
-# Create a virtual environment
-python -m venv churnProject
+```
+.
+├── DockerFile                  # Container build definition
+├── Models/                     # Serialized models & preprocessing artifacts
+│   ├── RandomForestTuned.pkl
+│   ├── processor.pkl
+│   └── xgb_tuned.pkl
+├── README.md
+├── app_ui.py                   # Streamlit front-end
+├── main.py                     # FastAPI app entry point
+├── datasets/
+│   └── churn-data.csv          # Raw/training dataset
+├── notebooks/
+│   ├── notebook.ipynb          # EDA / model training & tuning
+│   └── passGenerator.ipynb     # TODO: describe purpose
+├── requirements.txt            # Python dependencies
+└── utils/
+    ├── CustomerData.py         # Request/response schema for customer records
+    ├── __init__.py
+    ├── config.py                # App configuration / constants
+    └── inference.py             # Model loading & prediction logic
+```
 
-# Activate the environment
-# On Windows:
-churnProject\Scripts\activate
-# On macOS/Linux:
-source churnProject/bin/activate
+> Note: `churnProject/` (virtual environment) and `__pycache__/` directories are excluded from version control — see [`.gitignore`](#development).
 
-# Install the required packages
-pip install -r requirements.txt
-💻 Running the Application
-1. Start the FastAPI Backend
-Run the backend server using uvicorn. The API handles the data validation and passes inputs to the serialized models in the Models/ directory.
+---
 
-Bash
-uvicorn main:app --reload
-API Documentation: Once running, navigate to http://127.0.0.1:8000/docs to view the interactive Swagger UI and test endpoints directly.
+## Getting Started
 
-2. Start the Frontend UI
-In a separate terminal window (with your virtual environment activated), launch your UI application:
+### Prerequisites
 
-Bash
+- Python 3.13+
+- pip
+- (Optional) Docker, if you want to run the containerized version
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <your-repo-url>
+   cd <repo-folder>
+   ```
+
+2. **Create and activate a virtual environment**
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate      # macOS/Linux
+   venv\Scripts\activate         # Windows
+   ```
+
+3. **Install dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+---
+
+## Usage
+
+### Running the API
+
+Start the FastAPI server:
+
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Once running, the interactive API docs are available at:
+
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+**Example request** *(TODO: confirm against your actual `/predict` schema in `CustomerData.py`)*:
+
+```bash
+curl -X POST "http://localhost:8000/predict" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "tenure": 12,
+        "MonthlyCharges": 70.5,
+        "Contract": "Month-to-month"
+      }'
+```
+
+### Running the UI
+
+The Streamlit app provides a simple interface for entering customer details and viewing churn predictions:
+
+```bash
 streamlit run app_ui.py
-Access the interface in your browser at http://localhost:8501.
+```
 
-🐳 Docker Deployment
-To build and run the entire application inside an isolated Docker container:
+By default this opens at `http://localhost:8501`.
 
-1. Build the Docker Image
-Bash
-docker build -t churn-prediction-app .
-2. Run the Docker Container
-Bash
-docker run -p 8000:8000 churn-prediction-app
-This maps port 8000 of the container to port 8000 on your host machine, making the FastAPI application accessible locally.
+### Running with Docker
 
-📊 Core Workflow & Endpoints
-Data Ingestion: The client sends customer details matching the schema defined in utils/CustomerData.py.
+Build the image:
 
-Preprocessing: The raw input data is passed through Models/processor.pkl to scale and encode features.
+```bash
+docker build -t churn-prediction -f DockerFile .
+```
 
-Inference (utils/inference.py): The processed data is fed into either xgb_tuned.pkl or RandomForestTuned.pkl to calculate the churn probability.
+Run the container:
 
-Response: The API returns a JSON response specifying whether the customer is likely to churn, alongside the calculated probability percentage.
+```bash
+docker run -p 8000:8000 churn-prediction
+```
 
+> If `app_ui.py` and `main.py` need to run simultaneously inside the same container, make sure your `DockerFile`/entrypoint starts both processes (e.g. via a process manager or a startup script), or build/run two separate containers — one per service.
 
-### 💡 Quick Tip for Cleanliness
-Before committing this to your repository, you might want to add a `.gitignore` file to avoid pushing compiled files and local environments. Here are a few paths from your structure that you should ideally exclude from git tracking:
-```text
+---
+
+## Models
+
+| File | Description |
+|---|---|
+| `Models/RandomForestTuned.pkl` | Hyperparameter-tuned Random Forest classifier |
+| `Models/xgb_tuned.pkl` | Hyperparameter-tuned XGBoost classifier |
+| `Models/processor.pkl` | Fitted preprocessing pipeline (encoding/scaling) used at inference time |
+
+Both models are trained on the same preprocessing pipeline (`processor.pkl`) to ensure consistent feature transformation between training and inference. Model selection/ensembling logic lives in `utils/inference.py`.
+
+---
+
+## Dataset
+
+- **Location:** `datasets/churn-data.csv`
+- **Description:** Historical customer records used for training, including demographic, account, and usage features along with a churn label.
+
+> TODO: Add column descriptions, size, and source/licensing info for the dataset.
+
+---
+
+## Notebooks
+
+| Notebook | Purpose |
+|---|---|
+| `notebooks/notebook.ipynb` | Exploratory data analysis, feature engineering, model training and hyperparameter tuning |
+| `notebooks/passGenerator.ipynb` | TODO: describe purpose (e.g. credential/test data generation) |
+
+---
+
+## Configuration
+
+Application settings (paths, thresholds, feature lists, etc.) are centralized in `utils/config.py`. Update this file to point to different model artifacts or change runtime behavior without touching the core logic.
+
+If your app reads secrets or environment-specific values, consider adding a `.env` file (not committed to version control) and loading it with a library such as `python-dotenv`.
+
+---
+
+## Development
+
+Recommended `.gitignore` entries for this project:
+
+```
 __pycache__/
+*.pyc
 churnProject/
-utils/__pycache__/
-utils/tempCodeRunnerFile*
-utils/t.ipynb
+*.ipynb_checkpoints/
+.env
+```
+
+Cleanup utilities (`utils/tempCodeRunnerFile.py`, `utils/tempCodeRunnerFile.ipynb`, `utils/t.ipynb`) appear to be editor scratch files — safe to remove or add to `.gitignore` if not part of the core pipeline.
+
+---
+
+## Troubleshooting
+
+- **Model file not found at inference time:** Confirm `Models/` paths in `utils/config.py` are correct relative to where `main.py`/`app_ui.py` is run from.
+- **Pickle version mismatch:** Models pickled with one version of `scikit-learn`/`xgboost` may fail to load with another. Ensure `requirements.txt` versions match those used during training.
+- **Port already in use:** Change the `--port` flag for `uvicorn` or the Streamlit `--server.port` option.
+
+---
+
+## License
+
+TODO: Add a license (e.g. MIT, Apache 2.0) or specify usage restrictions.
