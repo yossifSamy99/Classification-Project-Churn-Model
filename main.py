@@ -33,7 +33,7 @@ async def verify_api_key(api_key:str =Depends(api_key_header)):
 
 
 @app.post("/predict/forest",tags=["Models"])
-async def predict_forest(data : CustomerData,api_key:str =Depends(api_key_header))-> dict:
+async def predict_forest(data : CustomerData,api_key:str =Depends(verify_api_key))-> dict:
     try:
         result=predict_new(data=data,preprocessor=preprocessor,model=RandomForestTuned)
         return result
@@ -41,7 +41,7 @@ async def predict_forest(data : CustomerData,api_key:str =Depends(api_key_header
         raise HTTPException(status_code=500,detail=str(e))
     
 @app.post("/predict/XGboost",tags=["Models"])
-async def predict_XGBoost(data : CustomerData,api_key:str =Depends(api_key_header))-> dict:
+async def predict_XGBoost(data : CustomerData,api_key:str =Depends(verify_api_key))-> dict:
     try:
         result=predict_new(data=data,preprocessor=preprocessor,model=xgb_tuned)
         return result
