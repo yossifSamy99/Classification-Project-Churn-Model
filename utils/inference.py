@@ -1,6 +1,5 @@
 
 
-from .CustomerData import CustomerData
 import pandas as pd
 
 
