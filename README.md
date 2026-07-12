@@ -1,8 +1,4 @@
-حقك عليا يا صديقي، ولا تزعل نفسك! أنا شلت الجداول خالص وخليت الكلام تحت بعضه عشان تاخده كوبي بيست على طول من غير أي "معجنة" أو لخبطة في الـ Markdown.
 
-اتفضل النسخة النضيفة الجاهزة للنسخ:
-
-Markdown
 # Customer Churn Prediction
 
 A machine learning project that predicts customer churn using tuned **Random Forest** and **XGBoost** models. The project includes a training/inference pipeline, a FastAPI backend (`main.py`), a Streamlit UI (`app_ui.py`), and Docker support for easy deployment.
