@@ -45,25 +45,25 @@ This project predicts whether a customer is likely to churn based on historical 
 ## Project Structure
 
 .
-├── DockerFile                  # Container build definition
-├── Models/                     # Serialized models & preprocessing artifacts
+├── DockerFile                  
+├── Models/                     
 │   ├── RandomForestTuned.pkl
 │   ├── processor.pkl
 │   └── xgb_tuned.pkl
 ├── README.md
-├── app_ui.py                   # Streamlit front-end
-├── main.py                     # FastAPI app entry point
+├── app_ui.py                   
+├── main.py                     
 ├── datasets/
-│   └── churn-data.csv          # Raw/training dataset
+│   └── churn-data.csv          
 ├── notebooks/
-│   ├── notebook.ipynb          # EDA / model training & tuning
-│   └── passGenerator.ipynb     # Utility for hashing credentials or creating test data passcodes
-├── requirements.txt            # Python dependencies
+│   ├── notebook.ipynb          
+│   └── passGenerator.ipynb     
+├── requirements.txt            
 └── utils/
-├── CustomerData.py         # Request/response Pydantic schema for customer records
+├── CustomerData.py         
 ├── init.py
-├── config.py               # App configuration / constants
-└── inference.py            # Model loading & prediction logic
+├── config.py              
+└── inference.py            
 
 
 > Note: `churnProject/` (virtual environment) and `__pycache__/` directories are excluded from version control — see [`.gitignore`](#development).
