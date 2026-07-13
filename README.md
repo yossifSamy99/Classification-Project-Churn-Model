@@ -1,171 +1,101 @@
-````markdown
-# Titanic Survival Prediction API
+# 📉 Customer Churn Prediction API
 
-A production-ready Machine Learning inference service that predicts Titanic passenger survival using a **TensorFlow/Keras** neural network deployed with **FastAPI**.
-
-The project demonstrates the complete deployment workflow of a Deep Learning model, including data preprocessing, feature engineering, request validation, secure API access, and batch inference through RESTful APIs.
+An end-to-end Machine Learning project for predicting customer churn using multiple trained classification models. The application exposes secure RESTful APIs built with **FastAPI**, performs automated data preprocessing, and returns both churn predictions and confidence probabilities.
 
 ---
 
-## Features
+## ✨ Features
 
-- 🚀 Deep Learning model built with TensorFlow/Keras
-- ⚡ High-performance REST API using FastAPI
-- 📦 Batch prediction support
-- ✅ Automatic request validation with Pydantic
-- 🔐 API Key authentication
-- 🔄 Scikit-Learn preprocessing pipeline
-- 🧠 Automatic feature engineering during inference
-- 📁 Modular and scalable project architecture
-- 💻 Interactive frontend (Streamlit/Gradio)
-
----
-
-## Tech Stack
-
-- Python
-- TensorFlow / Keras
-- Scikit-Learn
-- FastAPI
-- Pydantic
-- Pandas
-- Uvicorn
-- Streamlit / Gradio
+- Predict customer churn using multiple ML models.
+- Supports both **Random Forest** and **XGBoost** classifiers.
+- Automatic data preprocessing before inference.
+- Strong request validation using **Pydantic**.
+- Secure API endpoints with **API Key Authentication**.
+- Interactive API documentation via Swagger UI.
+- Dockerized for easy deployment.
+- Returns both prediction and probability score.
 
 ---
 
-## Project Structure
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Language | Python |
+| API | FastAPI |
+| Machine Learning | Scikit-learn, XGBoost |
+| Data Processing | Pandas |
+| Validation | Pydantic |
+| Model Serialization | Joblib |
+| Deployment | Docker |
+| Documentation | Swagger UI |
+
+---
+
+## 📂 Project Structure
 
 ```text
 .
+├── Dockerfile
 ├── README.md
+├── requirements.txt
 ├── app_ui.py
 ├── main.py
-├── requirements.txt
-└── src/
+│
+├── Models
+│   ├── RandomForestTuned.pkl
+│   ├── xgb_tuned.pkl
+│   └── processor.pkl
+│
+├── datasets
+│   └── churn-data.csv
+│
+├── notebooks
+│   ├── notebook.ipynb
+│   └── passGenerator.ipynb
+│
+└── utils
     ├── __init__.py
-    ├── inference.py
-    ├── artifacts/
-    │   ├── best_model.keras
-    │   └── preprocessor.joblib
-    └── utils/
-        ├── __init__.py
-        ├── config.py
-        ├── request.py
-        └── response.py
+    ├── config.py
+    ├── CustomerData.py
+    └── inference.py
 ```
 
 ---
 
-## How It Works
+## 🚀 Getting Started
 
-1. Receive passenger information through the REST API.
-2. Validate incoming data using **Pydantic**.
-3. Generate additional features:
-   - Family Size
-   - Is Alone
-4. Apply the saved Scikit-Learn preprocessing pipeline.
-5. Load the trained TensorFlow model.
-6. Generate predictions.
-7. Return structured JSON responses.
-
----
-
-## API Endpoints
-
-### Health Check
-
-**GET /**
-
-Response
-
-```json
-{
-    "message": "up & running"
-}
-```
-
----
-
-### Predict Passenger Survival
-
-**POST /Classify**
-
-#### Headers
-
-```http
-X-API-KEY: your_api_key
-```
-
-#### Request Body
-
-```json
-[
-    {
-        "passenger_id": 1,
-        "pclass": 3,
-        "parch": 0,
-        "sibsp": 1,
-        "sex": "male",
-        "embarked": "S",
-        "age": 22,
-        "fare": 7.25
-    }
-]
-```
-
-#### Response
-
-```json
-{
-    "predictions": [
-        {
-            "passenger_id": 1,
-            "predicted": "not survived"
-        }
-    ]
-}
-```
-
----
-
-## Installation
-
-### 1. Clone the Repository
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/titanic-survival-api.git
+git clone https://github.com/yossifSamy99/Classification-Project-Churn-Model
 
-cd titanic-survival-api
+cd customer-churn-api
 ```
 
 ---
 
-### 2. Create a Virtual Environment
-
-```bash
-python -m venv .venv
-```
-
----
-
-### 3. Activate the Environment
+### 2. Create a virtual environment
 
 **Windows**
 
 ```bash
-.venv\Scripts\activate
+python -m venv venv
+
+venv\Scripts\activate
 ```
 
 **Linux / macOS**
 
 ```bash
-source .venv/bin/activate
+python3 -m venv venv
+
+source venv/bin/activate
 ```
 
 ---
 
-### 4. Install Dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -173,25 +103,31 @@ pip install -r requirements.txt
 
 ---
 
-## Run the API
+### 4. Run the application
 
 ```bash
 uvicorn main:app --reload
 ```
 
-The API will be available at:
+The server will start at
 
 ```
 http://127.0.0.1:8000
 ```
 
-Swagger Documentation:
+---
+
+## 📖 API Documentation
+
+FastAPI automatically generates interactive API documentation.
+
+Swagger UI
 
 ```
 http://127.0.0.1:8000/docs
 ```
 
-ReDoc Documentation:
+ReDoc
 
 ```
 http://127.0.0.1:8000/redoc
@@ -199,62 +135,162 @@ http://127.0.0.1:8000/redoc
 
 ---
 
-## Security
+## 🔐 Authentication
 
-All endpoints are protected using **API Key Authentication**.
+Protected endpoints require an API Key.
 
 Include the following header in every request:
 
 ```http
-X-API-KEY: your_api_key
+X-API-Key: YOUR_SECRET_KEY
 ```
 
-Unauthorized requests return:
+---
+
+## 📬 API Endpoints
+
+### Home
 
 ```http
-403 Forbidden
+GET /
+```
+
+Returns the application status.
+
+---
+
+### Random Forest Prediction
+
+```http
+POST /predict/forest
 ```
 
 ---
 
-## Machine Learning Pipeline
+### XGBoost Prediction
 
-```
-Input Data
-     │
-     ▼
-Pydantic Validation
-     │
-     ▼
-Feature Engineering
-(Family Size & Is Alone)
-     │
-     ▼
-Preprocessor
-(Joblib)
-     │
-     ▼
-TensorFlow Model
-(.keras)
-     │
-     ▼
-Prediction
-     │
-     ▼
-JSON Response
+```http
+POST /predict/XGboost
 ```
 
 ---
 
-## Future Improvements
+## 📝 Sample Request
 
-- Docker containerization
-- Cloud deployment
-- Prediction probability scores
-- Model monitoring
-- Logging
-- Unit testing
-- CI/CD pipeline
+```json
+{
+    "CreditScore":650,
+    "Geography":"France",
+    "Gender":"Male",
+    "Age":42,
+    "Tenure":5,
+    "Balance":120000,
+    "NumOfProducts":2,
+    "HasCrCard":1,
+    "IsActiveMember":1,
+    "EstimatedSalary":85000
+}
+```
 
 ---
 
+## ✅ Sample Response
+
+```json
+{
+    "probability":[
+        [
+            0.92,
+            0.08
+        ]
+    ],
+    "prediction":false
+}
+```
+
+---
+
+## ⚙️ Machine Learning Pipeline
+
+The prediction workflow follows these steps:
+
+1. Receive customer information.
+2. Validate input using Pydantic.
+3. Convert request into a Pandas DataFrame.
+4. Apply the saved preprocessing pipeline.
+5. Load the selected trained model.
+6. Generate prediction.
+7. Calculate prediction probability.
+8. Return results as JSON.
+
+---
+
+## 🤖 Models
+
+The project includes multiple trained models:
+
+- Random Forest (Tuned)
+- XGBoost (Tuned)
+
+Both models use the same preprocessing pipeline to ensure consistency between training and inference.
+
+---
+
+## 📊 Input Features
+
+| Feature | Description |
+|----------|-------------|
+| CreditScore | Customer credit score |
+| Geography | Customer country |
+| Gender | Customer gender |
+| Age | Customer age |
+| Tenure | Years with the bank |
+| Balance | Current account balance |
+| NumOfProducts | Number of products |
+| HasCrCard | Credit card ownership |
+| IsActiveMember | Active membership |
+| EstimatedSalary | Estimated annual salary |
+
+---
+
+## 🐳 Docker
+
+Build the Docker image
+
+```bash
+docker build -t churn-api .
+```
+
+Run the container
+
+```bash
+docker run -p 8000:8000 churn-api
+```
+
+---
+
+## 📸 Screenshots
+
+### Swagger API
+
+> Add screenshot here.
+
+---
+
+### Prediction Interface
+
+> Add screenshot here.
+
+---
+
+## 🔮 Future Improvements
+
+- Add model versioning.
+- Support batch predictions.
+- Add user authentication with JWT.
+- Deploy on AWS or Azure.
+- Integrate CI/CD pipeline.
+- Add monitoring and logging.
+- Improve model explainability using SHAP.
+
+---
