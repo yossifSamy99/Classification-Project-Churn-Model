@@ -432,13 +432,13 @@ docker run -p 8000:8000 churn-api
 ### Swagger API
 
 
-![Swagger UI](\images\sw.png)
+![Swagger UI](images\sw.png)
 
 ---
 
 ### Prediction Interface
 
-![Application UI](\images\st.png)
+![Application UI](images\st.png)
 
 
 ---
