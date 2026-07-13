@@ -1,202 +1,260 @@
+````markdown
+# Titanic Survival Prediction API
 
-# Customer Churn Prediction
+A production-ready Machine Learning inference service that predicts Titanic passenger survival using a **TensorFlow/Keras** neural network deployed with **FastAPI**.
 
-A machine learning project that predicts customer churn using tuned **Random Forest** and **XGBoost** models. The project includes a training/inference pipeline, a FastAPI backend (`main.py`), a Streamlit UI (`app_ui.py`), and Docker support for easy deployment.
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-  - [Running the API](#running-the-api)
-  - [Running the UI](#running-the-ui)
-  - [Running with Docker](#running-with-docker)
-- [Models](#models)
-- [Dataset](#dataset)
-- [Notebooks](#notebooks)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
+The project demonstrates the complete deployment workflow of a Deep Learning model, including data preprocessing, feature engineering, request validation, secure API access, and batch inference through RESTful APIs.
 
 ---
 
-## Overview
+## Features
 
-This project predicts whether a customer is likely to churn based on historical customer data. It covers the full ML lifecycle:
+- 🚀 Deep Learning model built with TensorFlow/Keras
+- ⚡ High-performance REST API using FastAPI
+- 📦 Batch prediction support
+- ✅ Automatic request validation with Pydantic
+- 🔐 API Key authentication
+- 🔄 Scikit-Learn preprocessing pipeline
+- 🧠 Automatic feature engineering during inference
+- 📁 Modular and scalable project architecture
+- 💻 Interactive frontend (Streamlit/Gradio)
 
-1. **Data preparation & EDA** — `notebooks/notebook.ipynb`
-2. **Model training & tuning** — Random Forest and XGBoost, with a saved preprocessing pipeline
-3. **Inference** — `utils/inference.py` loads the trained models and processor to score new customer data
-4. **Serving** — a FastAPI app (`main.py`) exposes predictions as an API, and a Streamlit app (`app_ui.py`) provides an interactive UI
-5. **Deployment** — containerized via `DockerFile`
+---
+
+## Tech Stack
+
+- Python
+- TensorFlow / Keras
+- Scikit-Learn
+- FastAPI
+- Pydantic
+- Pandas
+- Uvicorn
+- Streamlit / Gradio
 
 ---
 
 ## Project Structure
 
+```text
 .
-├── DockerFile                  
-├── Models/                     
-│   ├── RandomForestTuned.pkl
-│   ├── processor.pkl
-│   └── xgb_tuned.pkl
 ├── README.md
-├── app_ui.py                   
-├── main.py                     
-├── datasets/
-│   └── churn-data.csv          
-├── notebooks/
-│   ├── notebook.ipynb          
-│   └── passGenerator.ipynb     
-├── requirements.txt            
-└── utils/
-├── CustomerData.py         
-├── init.py
-├── config.py              
-└── inference.py            
-
-
-> Note: `churnProject/` (virtual environment) and `__pycache__/` directories are excluded from version control — see [`.gitignore`](#development).
+├── app_ui.py
+├── main.py
+├── requirements.txt
+└── src/
+    ├── __init__.py
+    ├── inference.py
+    ├── artifacts/
+    │   ├── best_model.keras
+    │   └── preprocessor.joblib
+    └── utils/
+        ├── __init__.py
+        ├── config.py
+        ├── request.py
+        └── response.py
+```
 
 ---
 
-## Getting Started
+## How It Works
 
-### Prerequisites
+1. Receive passenger information through the REST API.
+2. Validate incoming data using **Pydantic**.
+3. Generate additional features:
+   - Family Size
+   - Is Alone
+4. Apply the saved Scikit-Learn preprocessing pipeline.
+5. Load the trained TensorFlow model.
+6. Generate predictions.
+7. Return structured JSON responses.
 
-- Python 3.13+
-- pip
-- (Optional) Docker, if you want to run the containerized version
+---
 
-### Installation
+## API Endpoints
 
-1. **Clone the repository**
+### Health Check
 
-   ```bash
-   git clone <your-repo-url>
-   cd <repo-folder>
-Create and activate a virtual environment
+**GET /**
 
-Bash
-python -m venv venv
-source venv/bin/activate      # macOS/Linux
-venv\Scripts\activate         # Windows
-Install dependencies
+Response
 
-Bash
+```json
+{
+    "message": "up & running"
+}
+```
+
+---
+
+### Predict Passenger Survival
+
+**POST /Classify**
+
+#### Headers
+
+```http
+X-API-KEY: your_api_key
+```
+
+#### Request Body
+
+```json
+[
+    {
+        "passenger_id": 1,
+        "pclass": 3,
+        "parch": 0,
+        "sibsp": 1,
+        "sex": "male",
+        "embarked": "S",
+        "age": 22,
+        "fare": 7.25
+    }
+]
+```
+
+#### Response
+
+```json
+{
+    "predictions": [
+        {
+            "passenger_id": 1,
+            "predicted": "not survived"
+        }
+    ]
+}
+```
+
+---
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/titanic-survival-api.git
+
+cd titanic-survival-api
+```
+
+---
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+---
+
+### 3. Activate the Environment
+
+**Windows**
+
+```bash
+.venv\Scripts\activate
+```
+
+**Linux / macOS**
+
+```bash
+source .venv/bin/activate
+```
+
+---
+
+### 4. Install Dependencies
+
+```bash
 pip install -r requirements.txt
-Usage
-Running the API
-Start the FastAPI server:
+```
 
-Bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-Once running, the interactive API docs are available at:
+---
 
-Swagger UI: http://localhost:8000/docs
+## Run the API
 
-ReDoc: http://localhost:8000/redoc
+```bash
+uvicorn main:app --reload
+```
 
-Example request (Aligned with the CustomerData schema):
+The API will be available at:
 
-Bash
-curl -X POST "http://localhost:8000/predict" \
-  -H "Content-Type: application/json" \
-  -d '{
-        "CreditScore": 650,
-        "Geography": "France",
-        "Gender": "Female",
-        "Age": 35,
-        "Tenure": 5,
-        "Balance": 12500.50,
-        "NumOfProducts": 2,
-        "HasCrCard": 1,
-        "IsActiveMember": 1,
-        "EstimatedSalary": 50000.00
-      }'
-Running the UI
-The Streamlit app provides a simple interface for entering customer details and viewing churn predictions:
+```
+http://127.0.0.1:8000
+```
 
-Bash
-streamlit run app_ui.py
-By default this opens at http://localhost:8501.
+Swagger Documentation:
 
-Running with Docker
-Build the image:
+```
+http://127.0.0.1:8000/docs
+```
 
-Bash
-docker build -t churn-prediction -f DockerFile .
-Run the container:
+ReDoc Documentation:
 
-Bash
-docker run -p 8000:8000 churn-prediction
-Models
-Models/RandomForestTuned.pkl: Hyperparameter-tuned Random Forest classifier.
+```
+http://127.0.0.1:8000/redoc
+```
 
-Models/xgb_tuned.pkl: Hyperparameter-tuned XGBoost classifier.
+---
 
-Models/processor.pkl: Fitted preprocessing pipeline (encoding/scaling) used at inference time.
+## Security
 
-Both models are trained on the same preprocessing pipeline (processor.pkl) to ensure consistent feature transformation between training and inference. Model selection/ensembling logic lives in utils/inference.py.
+All endpoints are protected using **API Key Authentication**.
 
-Dataset
-Location: datasets/churn-data.csv
+Include the following header in every request:
 
-Description: Historical bank customer records used for predicting customer churn. It includes a blend of demographic details, transactional behavior, and account status indicators.
+```http
+X-API-KEY: your_api_key
+```
 
-Features breakdown (from CustomerData.py)
-CreditScore: Integer (>= 0) - The customer's calculated creditworthiness.
+Unauthorized requests return:
 
-Geography: String ('France', 'Spain', 'Germany') - Country of residence.
+```http
+403 Forbidden
+```
 
-Gender: String ('Female', 'Male') - Biological sex.
+---
 
-Age: Integer (18 to 100) - Customer age in years.
+## Machine Learning Pipeline
 
-Tenure: Integer (0 to 10) - Number of years dealing with the bank.
+```
+Input Data
+     │
+     ▼
+Pydantic Validation
+     │
+     ▼
+Feature Engineering
+(Family Size & Is Alone)
+     │
+     ▼
+Preprocessor
+(Joblib)
+     │
+     ▼
+TensorFlow Model
+(.keras)
+     │
+     ▼
+Prediction
+     │
+     ▼
+JSON Response
+```
 
-Balance: Float (>= 0.0) - Current total balance on account.
+---
 
-NumOfProducts: Integer (1 to 4) - Total number of bank items/services used.
+## Future Improvements
 
-HasCrCard: Integer (0 for No, 1 for Yes) - Does the client hold a credit card.
+- Docker containerization
+- Cloud deployment
+- Prediction probability scores
+- Model monitoring
+- Logging
+- Unit testing
+- CI/CD pipeline
 
-IsActiveMember: Integer (0 for No, 1 for Yes) - Active status based on account engagement.
+---
 
-EstimatedSalary: Float (>= 0.0) - Approximated salary of the client.
-
-Notebooks
-notebooks/notebook.ipynb: Exploratory data analysis, feature engineering, model training and hyperparameter tuning.
-
-notebooks/passGenerator.ipynb: Utility script for generating/hashing user passwords, access tokens, or secure test credentials.
-
-Configuration
-Application settings (paths, thresholds, feature lists, etc.) are centralized in utils/config.py. Update this file to point to different model artifacts or change runtime behavior without touching the core logic.
-
-If your app reads secrets or environment-specific values, consider adding a .env file (not committed to version control) and loading it with a library such as python-dotenv.
-
-Development
-Recommended .gitignore entries for this project:
-
-__pycache__/
-*.pyc
-churnProject/
-*.ipynb_checkpoints/
-.env
-Cleanup utilities (utils/tempCodeRunnerFile.py, utils/tempCodeRunnerFile.ipynb, utils/t.ipynb) appear to be editor scratch files — safe to remove or add to .gitignore if not part of the core pipeline.
-
-Troubleshooting
-Model file not found at inference time: Confirm Models/ paths in utils/config.py are correct relative to where main.py/app_ui.py is run from.
-
-Pickle version mismatch: Models pickled with one version of scikit-learn/xgboost may fail to load with another. Ensure requirements.txt versions match those used during training.
-
-Port already in use: Change the --port flag for uvicorn or the Streamlit --server.port option.
-
-License
-This project is open source and available under the MIT License.
