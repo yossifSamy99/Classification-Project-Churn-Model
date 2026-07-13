@@ -431,13 +431,15 @@ docker run -p 8000:8000 churn-api
 
 ### Swagger API
 
-> Add screenshot here.
+
+![Swagger UI](\images\sw.png)
 
 ---
 
 ### Prediction Interface
 
-> Add screenshot here.
+![Application UI](\images\st.png)
+
 
 ---
 
@@ -452,4 +454,3 @@ docker run -p 8000:8000 churn-api
 - Improve model explainability using SHAP.
 
 ---
->>>>>>> 39804759c32ff4da0177be58ede016393b737bde
