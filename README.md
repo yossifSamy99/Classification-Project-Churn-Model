@@ -142,7 +142,7 @@ Protected endpoints require an API Key.
 Include the following header in every request:
 
 ```http
-X-API-Key: YOUR_SECRET_KEY
+X-API-Key: 6811c90afe7437afcb8b
 ```
 
 ---
